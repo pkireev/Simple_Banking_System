@@ -1,0 +1,20 @@
+type: code
+files:
+- name: src/Main.java
+  visible: true
+  text: // write the class Complex here
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/2986#comment
+status: Failed
+feedback:
+  message: |
+    Compilation error
+    Main.java:19: error: real has private access in Complex
+            System.out.println(complex.real + " " + complex.imaginary);
+                                      ^
+    Main.java:19: error: imaginary has private access in Complex
+            System.out.println(complex.real + " " + complex.imaginary);
+                                                           ^
+    2 errors
+  time: Thu, 11 Mar 2021 06:25:39 UTC
+record: -1

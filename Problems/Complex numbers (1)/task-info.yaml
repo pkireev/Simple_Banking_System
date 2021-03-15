@@ -1,0 +1,20 @@
+type: code
+custom_name: Complex numbers
+files:
+- name: src/Main.java
+  visible: true
+  text: |-
+    class Complex {
+
+        double real;
+        double image;
+
+        // write methods here
+    }
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/2952#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Thu, 11 Mar 2021 13:26:05 UTC
+record: -1
