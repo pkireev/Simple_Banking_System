@@ -490,6 +490,12 @@ files:
         }
     }
   learner_created: false
+- name: card.s3db
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/93/stages/517/implement#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Fri, 19 Mar 2021 16:02:15 UTC
 record: -1

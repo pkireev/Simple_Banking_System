@@ -1,15 +1,31 @@
 package banking;
+import org.sqlite.SQLiteDataSource;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
     static Scanner sc = new Scanner(System.in);
+    static private int id = 1;
     static private String cardNumber;
     static private long balance;
     static private String pin;
     static boolean isLogged = false;
+    static String dbFile = "./cards.s3db";
 
     public static void main(String[] args) {
+        if (args.length >= 2) {
+            if ("-fileName".equals(args[0])) {
+                dbFile = args[1];
+            }
+        }
+
+        intitializeDb();
+
         while (true) {
             if (isLogged) {
                 printMenu2();
@@ -93,6 +109,8 @@ public class Main {
         System.out.println("Your card PIN:");
         System.out.println(pin);
         System.out.println();
+
+        insertCardDataIntoDb();
     }
 
     static boolean logIn() {
@@ -101,13 +119,24 @@ public class Main {
         System.out.println("Enter your PIN:");
         String getPin = sc.nextLine();
 
-        if (getCard.equals(cardNumber) && getPin.equals(pin)) {
+        balance = getCardDataFromDb(getCard, getPin);
+
+        if (balance >= 0) {
             System.out.println("You successfully logged in!\n");
             return true;
         } else {
             System.out.println("Wrong card number or PIN!\n");
             return false;
         }
+
+
+//        if (getCard.equals(cardNumber) && getPin.equals(pin)) {
+//            System.out.println("You successfully logged in!\n");
+//            return true;
+//        } else {
+//            System.out.println("Wrong card number or PIN!\n");
+//            return false;
+//        }
     }
 
     static void logOut() {
@@ -142,5 +171,73 @@ public class Main {
         cardNumber += lastDigit;
 
         // System.out.println(cardNumber + " " + sum + " " + lastDigit);
+    }
+
+    public static void intitializeDb() {
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + dbFile);
+
+        try (Connection connection = dataSource.getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("CREATE TABLE IF NOT EXISTS card (" +
+                        "id INTEGER," +
+                        "number TEXT," +
+                        "pin TEXT," +
+                        "balance INTEGER DEFAULT 0" +
+                        ");");
+                ResultSet rs = statement.executeQuery("SELECT id FROM card ORDER BY id DESC LIMIT 1;");
+                if (rs.next()) {
+                    id = rs.getInt("id");
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertCardDataIntoDb() {
+        String sql = String.format("INSERT INTO card (id, number, pin) VALUES (%d, %s, %s);", id++, cardNumber, pin);
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + dbFile);
+
+        try (Connection connection = dataSource.getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static long getCardDataFromDb(String enteredNumber, String enteredPin) {
+        String sql = String.format("SELECT * FROM card WHERE number = %s", enteredNumber);
+        long accountBalance = -1;
+
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + dbFile);
+
+        try (Connection connection = dataSource.getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    if (rs.getString("pin").equals(enteredPin)) {
+                        accountBalance = rs.getLong("balance");
+                        break;
+                    }
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return accountBalance;
     }
 }
