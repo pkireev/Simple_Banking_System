@@ -83,24 +83,24 @@ public class Main {
     }
 
     static void createAccount() {
-        String newCard = "400000";
-        String newPin = "";
+        StringBuilder newCard = new StringBuilder("400000");
+        StringBuilder newPin = new StringBuilder();
         Random r = new Random(System.nanoTime());
 
         for (int i = 0; i < 9; i++) {
-            newCard += String.valueOf(r.nextInt(10));
+            newCard.append(r.nextInt(10));
         }
 
-        cardNumber = newCard;
+        cardNumber = String.valueOf(newCard);
 
         // creating the last number by Luhn algorithm
         addLastDigitByLuhn();
 
         for (int i = 0; i < 4; i++) {
-            newPin += String.valueOf(r.nextInt(10));
+            newPin.append(r.nextInt(10));
         }
 
-        pin = newPin;
+        pin = String.valueOf(newPin);
         balance = 0;
 
         System.out.println("Your card has been created");
@@ -128,15 +128,6 @@ public class Main {
             System.out.println("Wrong card number or PIN!\n");
             return false;
         }
-
-
-//        if (getCard.equals(cardNumber) && getPin.equals(pin)) {
-//            System.out.println("You successfully logged in!\n");
-//            return true;
-//        } else {
-//            System.out.println("Wrong card number or PIN!\n");
-//            return false;
-//        }
     }
 
     static void logOut() {
