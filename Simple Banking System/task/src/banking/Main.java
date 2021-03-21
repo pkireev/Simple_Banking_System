@@ -16,6 +16,7 @@ public class Main {
     static private String pin;
     static boolean isLogged = false;
     static String dbFile = "./cards.s3db";
+    static Statement st;
 
     public static void main(String[] args) {
         if (args.length >= 2) {
@@ -34,7 +35,7 @@ public class Main {
                 switch (option) {
                     case 0:
                         System.out.println("Bye!");
-                        sc.close();
+                        closeAll();
                         return;
                     case 1:
                         printBalance();
@@ -51,7 +52,7 @@ public class Main {
 
                 switch (option) {
                     case 0:
-                        sc.close();
+                        closeAll();
                         return;
                     case 1:
                         createAccount();
@@ -165,24 +166,21 @@ public class Main {
     }
 
     public static void intitializeDb() {
-        SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite:" + dbFile);
+        try {
+            SQLiteDataSource dataSource = new SQLiteDataSource();
+            dataSource.setUrl("jdbc:sqlite:" + dbFile);
+            Connection con = dataSource.getConnection();
 
-        try (Connection connection = dataSource.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate("CREATE TABLE IF NOT EXISTS card (" +
-                        "id INTEGER," +
-                        "number TEXT," +
-                        "pin TEXT," +
-                        "balance INTEGER DEFAULT 0" +
-                        ");");
-                ResultSet rs = statement.executeQuery("SELECT id FROM card ORDER BY id DESC LIMIT 1;");
-                if (rs.next()) {
-                    id = rs.getInt("id");
-                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
+            st = con.createStatement();
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS card (" +
+                    "id INTEGER," +
+                    "number TEXT," +
+                    "pin TEXT," +
+                    "balance INTEGER DEFAULT 0" +
+                    ");");
+            ResultSet rs = st.executeQuery("SELECT id FROM card ORDER BY id DESC LIMIT 1;");
+            if (rs.next()) {
+                id = rs.getInt("id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -194,12 +192,8 @@ public class Main {
         SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl("jdbc:sqlite:" + dbFile);
 
-        try (Connection connection = dataSource.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate(sql);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try {
+            st.executeUpdate(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -209,26 +203,27 @@ public class Main {
         String sql = String.format("SELECT * FROM card WHERE number = %s", enteredNumber);
         long accountBalance = -1;
 
-        SQLiteDataSource dataSource = new SQLiteDataSource();
-        dataSource.setUrl("jdbc:sqlite:" + dbFile);
-
-        try (Connection connection = dataSource.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                ResultSet rs = statement.executeQuery(sql);
-                while (rs.next()) {
-                    if (rs.getString("pin").equals(enteredPin)) {
-                        accountBalance = rs.getLong("balance");
-                        break;
-                    }
+        try {
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                if (rs.getString("pin").equals(enteredPin)) {
+                    accountBalance = rs.getLong("balance");
+                    break;
                 }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+                e.printStackTrace();
         }
 
         return accountBalance;
+    }
+
+    public static void closeAll() {
+        sc.close();
+        try {
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
