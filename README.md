@@ -1,5 +1,13 @@
 # Simple_Banking_System
-Written with the Luhn Algorithm, java.util.Scanner, Menus, SQL scripts and an SQLite database.
+Written with:
+  - the Luhn Algorithm
+  - java.util.Scanner
+  - Menus
+  - Authorization
+  - SQL scripts
+  - prepared statements
+  - SQLite database
+  - StringBuilder
 
 You can:
   - create accounts and then receive a correct card's number (the last digit is a verification code).
