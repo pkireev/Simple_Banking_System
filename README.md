@@ -1,4 +1,6 @@
 # Simple_Banking_System
+Just a little console application
+
 Written with:
   - the Luhn Algorithm
   - java.util.Scanner
